@@ -12,7 +12,6 @@ public class BaseTest {
 
     @BeforeAll
     static void setup() {
-
         WebDriverManager.chromedriver().setup();
     }
 

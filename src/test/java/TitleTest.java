@@ -7,9 +7,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DisplayName("Page Title Validation")
 class TitleTest extends BaseTest {
+
     @ParameterizedTest
     @CsvFileSource(resources = "/testData.csv")
     @Tag(TestConstants.REGRESSION)
+    @Tag("{0}")
     void shouldValidateSiiPortalWebPageTitle(String url, String expectedTitle) {
         driver.get(url);
         WebPageUtils.maximiseWindow.accept(driver);
