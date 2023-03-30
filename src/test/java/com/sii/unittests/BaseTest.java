@@ -1,33 +1,39 @@
 package com.sii.unittests;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
+import com.sii.configuration.BrowserEnvironment;
+import com.sii.configuration.EnvironmentProperty;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class BaseTest {
 
-    protected WebDriver driver;
+    protected static WebDriver driver;
     private static final Logger logger = LoggerFactory.getLogger("com.sii.unittests.BaseTest.class");
-
+    private static BrowserEnvironment browserEnvironment;
+    public static EnvironmentProperty environmentProperty;
 
     @BeforeAll
     static void setup() {
-        WebDriverManager.chromedriver().setup();
-        logger.debug("WebDriver Initialized properly");
+
+        environmentProperty = EnvironmentProperty.getInstance();
+        browserEnvironment = new BrowserEnvironment();
+        driver = browserEnvironment.getDriver();
+        log.debug("WebDriver Initialized properly");
     }
 
     @AfterEach
     void teardown() {
         driver.quit();
+        log.debug("driver closed.");
     }
 
-    @BeforeEach
-    void setupDriver() {
-        driver = new ChromeDriver();
-    }
+//    @BeforeEach
+//    void setupDriver() {
+//        driver = new ChromeDriver();
+//    }
 }
