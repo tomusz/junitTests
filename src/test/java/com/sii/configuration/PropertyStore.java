@@ -2,84 +2,67 @@ package com.sii.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.apache.commons.lang3.StringUtils;
+import com.sii.configuration.enums.EnvironmentNames;
+import com.sii.configuration.objects.ConfigBrowser;
+import com.sii.configuration.objects.ConfigWebElement;
+import com.sii.configuration.objects.Configuration;
+import com.sii.configuration.objects.Environment;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.Arrays;
 
-public enum PropertyStore {
-    BROWSER("browser"), BROWSER_WEBELEMENT_TIMEOUT("browser.webElement.timeout"),
-    BROWSER_HEADLESS("browser.headless"), ENVIRONMENT("browser.environment"),
-    BROWSER_ATTACH_SCREENSHOT("browser.screenshots");
+public class PropertyStore {
 
-    public static final String CONFIG_PROP = "config.properties";
     public static final String CONFIG_YAML = "config.yaml";
-    private static Properties properties = null;
-    private String propertyKey;
-    private String value;
+    private static Configuration configuration = null;
 
-    PropertyStore(String key) {
-        this.propertyKey = key;
-        this.value = this.retrieveValue(key);
-    }
 
-    private String retrieveValue(String key) {
-        return System.getProperty(key) != null ? System.getProperty(key) : getValueFromConfigFile(key);
-    }
-
-    private String getValueFromConfigFile(String key) {
-        if (properties == null) {
-            properties = loadConfigFile();
+    private static void initConfiguration() {
+        if (configuration == null) {
+            configuration = loadConfigFile();
         }
-        Object objectFromFile = properties.get(key);
-        return objectFromFile != null ? Objects.toString(objectFromFile) : null;
     }
 
-    public static void loadConfigFileYaml() {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        File file = new File(classLoader.getResource(CONFIG_YAML).getFile());
+    public static Configuration getConfiguration() {
+        initConfiguration();
+        return configuration;
+    }
+
+    public static ConfigBrowser getBrowserConfiguration() {
+        initConfiguration();
+        return configuration.getConfigBrowser();
+    }
+
+    public static ConfigWebElement getWebElementConfiguration() {
+        initConfiguration();
+        return configuration.getConfigBrowser().getConfigWebElement();
+    }
+
+    public static Environment getEnvironmentUnderTests() {
+        initConfiguration();
+        EnvironmentNames chosenEnvironment = Arrays.stream(EnvironmentNames.values())
+                .filter(x -> x.getName().equals(configuration.getConfigBrowser().getEnvironment()))
+                .findFirst().get();
+        return configuration.getEnvironments().get(chosenEnvironment.getId());
+    }
+
+    private static Configuration loadConfigFile() {
+
+        File configFile;
+        Configuration conf;
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-    }
-
-    private Properties loadConfigFile() {
         try {
-            InputStream configFile = null;
-            Properties properties = null;
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            configFile = new File(classLoader.getResource(CONFIG_YAML).getFile());
+            conf = mapper.readerFor(Configuration.class).readValue(configFile);
 
-            try {
-                configFile = ClassLoader.getSystemClassLoader().getResourceAsStream(CONFIG_PROP);
-                properties = new Properties();
-                properties.load(configFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                assert configFile != null;
-                configFile.close();
-            }
-            return properties;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
+        return conf;
 
-    public boolean isSpecified() {
-        return StringUtils.isNotEmpty(this.value);
-    }
-
-    public String getValue() {
-        return this.retrieveValue(this.propertyKey);
-    }
-
-    public int getIntValue() {
-        return Integer.parseInt(this.retrieveValue(this.propertyKey));
-    }
-
-    public boolean getBooleanValue() {
-        return this.isSpecified() && Boolean.parseBoolean(this.value);
     }
 
 }

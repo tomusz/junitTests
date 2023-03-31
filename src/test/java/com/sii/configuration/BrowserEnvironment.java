@@ -11,6 +11,8 @@ import org.openqa.selenium.ie.InternetExplorerOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 public class BrowserEnvironment {
     private String browserName;
     private boolean headlessBrowser;
@@ -20,14 +22,23 @@ public class BrowserEnvironment {
     private Logger logger;
     private WebDriver driver;
 
+
     public BrowserEnvironment() {
-        this.browserName = "chrome";
-        this.headlessBrowser = false;
-        this.webElementTimeOut = 10;
-        this.attachScreenshot = false;
-        this.environmentName = "test";
+        this.browserName = Optional.ofNullable(PropertyStore.getBrowserConfiguration().getName())
+                .orElse(PropertyStore.getConfiguration().getDefaultBrowser());
+        this.headlessBrowser = PropertyStore.getBrowserConfiguration().isHeadless();
+        this.webElementTimeOut = PropertyStore.getWebElementConfiguration().getTimeout();
+        this.attachScreenshot = PropertyStore.getBrowserConfiguration().isScreenshots();
+        this.environmentName = PropertyStore.getBrowserConfiguration().getEnvironment();
         this.logger = LoggerFactory.getLogger(BrowserEnvironment.class);
-        this.initBrowserSettings();
+    }
+    public BrowserEnvironment(String defaultBrowser) {
+        this.browserName = Optional.ofNullable(PropertyStore.getBrowserConfiguration().getName()).orElse(defaultBrowser);
+        this.headlessBrowser = PropertyStore.getBrowserConfiguration().isHeadless();
+        this.webElementTimeOut = PropertyStore.getWebElementConfiguration().getTimeout();
+        this.attachScreenshot = PropertyStore.getBrowserConfiguration().isScreenshots();
+        this.environmentName = PropertyStore.getBrowserConfiguration().getEnvironment();
+        this.logger = LoggerFactory.getLogger(BrowserEnvironment.class);
     }
 
     public BrowserEnvironment(String browserName, boolean headlessBrowser, int webElementTimeOut,
@@ -39,18 +50,6 @@ public class BrowserEnvironment {
         this.environmentName = environmentName;
     }
 
-    private void initBrowserSettings() {
-        this.webElementTimeOut = PropertyStore.BROWSER_WEBELEMENT_TIMEOUT.isSpecified() ?
-                PropertyStore.BROWSER_WEBELEMENT_TIMEOUT.getIntValue() :
-                this.webElementTimeOut;
-        this.attachScreenshot = PropertyStore.BROWSER_ATTACH_SCREENSHOT.isSpecified() ?
-                PropertyStore.BROWSER_ATTACH_SCREENSHOT.getBooleanValue() :
-                this.attachScreenshot;
-        this.headlessBrowser = PropertyStore.BROWSER_HEADLESS.isSpecified() ?
-                PropertyStore.BROWSER_HEADLESS.getBooleanValue() :
-                this.headlessBrowser;
-    }
-
     public WebDriver getDriver() {
         WebDriver driver;
         switch (this.browserName) {
@@ -59,19 +58,19 @@ public class BrowserEnvironment {
                 WebDriverManager.chromedriver().setup();
                 chromeOptions.addArguments("start-maximised");
                 driver = new ChromeDriver(chromeOptions);
-                driver.get(System.getProperty("appUrl"));
+                driver.get(PropertyStore.getEnvironmentUnderTests().getApplicationUrl());
                 break;
             case "firefox" :
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
                 WebDriverManager.firefoxdriver().setup();
                 firefoxOptions.addArguments("start-maximised");
                 driver = new FirefoxDriver(firefoxOptions);
-                driver.get(System.getProperty("appUrl"));
+                driver.get(PropertyStore.getEnvironmentUnderTests().getApplicationUrl());
             default :
                 InternetExplorerOptions internetExplorerOptions = new InternetExplorerOptions();
                 WebDriverManager.iedriver().setup();
                 driver = new InternetExplorerDriver(internetExplorerOptions);
-                driver.get(System.getProperty("appUrl"));
+                driver.get(PropertyStore.getEnvironmentUnderTests().getApplicationUrl());
         }
         this.driver = driver;
         return this.driver;

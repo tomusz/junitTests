@@ -11,10 +11,10 @@ import lombok.Setter;
 public class Environment {
 
     @JsonProperty("envName")
-    private String environmentName;
+    public String environmentName;
 
-    private String title;
+    public String title;
     @JsonProperty("appUrl")
-    private String applicationUrl;
+    public String applicationUrl;
 
 }

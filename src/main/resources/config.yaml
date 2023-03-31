@@ -6,9 +6,9 @@ browser:
   headless: true
   webElement:
     timeout: 60
-  environment: test
+  environment: int
+#  environment: test
 #  name: firefox
-
 
 environment:
     - envName: test
