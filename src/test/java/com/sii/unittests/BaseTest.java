@@ -13,16 +13,15 @@ import org.slf4j.LoggerFactory;
 public class BaseTest {
 
     protected static WebDriver driver;
-    private static final Logger logger = LoggerFactory.getLogger("com.sii.unittests.BaseTest.class");
     private static BrowserEnvironment browserEnvironment;
     public static EnvironmentProperty environmentProperty;
 
     @BeforeAll
     static void setup() {
 
-        environmentProperty = EnvironmentProperty.getInstance();
-        browserEnvironment = new BrowserEnvironment();
-        driver = browserEnvironment.getDriver();
+//        environmentProperty = EnvironmentProperty.getInstance();
+//        browserEnvironment = new BrowserEnvironment();
+//        driver = browserEnvironment.getDriver();
         log.debug("WebDriver Initialized properly");
     }
 

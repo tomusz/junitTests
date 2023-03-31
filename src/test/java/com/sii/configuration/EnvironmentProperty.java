@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.equalTo;
 public class EnvironmentProperty {
 
     private static Logger logger = LoggerFactory.getLogger(EnvironmentProperty.class);
+
     private final String APP_ENV;
     private final BrowserEnvironment BROWSER_ENV;
 
@@ -52,6 +53,11 @@ public class EnvironmentProperty {
 
     private void loadAllEnvPropertiesToSystem(String environmentName) {
         setSystemPropertiesFromPathUrl(environmentName);
+//        setSystemPropertiesFromPathUrlYaml(environmentName);
+    }
+
+    private void setSystemPropertiesFromPathUrlYaml() {
+
     }
 
     private void setSystemPropertiesFromPathUrl(String directoryName) {

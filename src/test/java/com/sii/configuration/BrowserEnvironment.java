@@ -12,19 +12,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BrowserEnvironment {
-    private String browserName = "chrome";
+    private String browserName;
     private boolean headlessBrowser;
     private int webElementTimeOut;
     private boolean attachScreenshot;
+    private String environmentName;
     private Logger logger;
     private WebDriver driver;
 
     public BrowserEnvironment() {
+        this.browserName = "chrome";
         this.headlessBrowser = false;
         this.webElementTimeOut = 10;
         this.attachScreenshot = false;
+        this.environmentName = "test";
         this.logger = LoggerFactory.getLogger(BrowserEnvironment.class);
         this.initBrowserSettings();
+    }
+
+    public BrowserEnvironment(String browserName, boolean headlessBrowser, int webElementTimeOut,
+                              boolean attachScreenshot, String environmentName) {
+        this.browserName = browserName;
+        this.headlessBrowser = headlessBrowser;
+        this.webElementTimeOut = webElementTimeOut;
+        this.attachScreenshot = attachScreenshot;
+        this.environmentName = environmentName;
     }
 
     private void initBrowserSettings() {
