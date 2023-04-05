@@ -1,26 +1,25 @@
 package com.sii.configuration;
 
-import com.sii.configuration.objects.Environment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Field;
+import java.util.Optional;
 
+import static com.sii.configuration.consts.PropertiesKeys.BROWSER_ENVIRONMENT;
+import static com.sii.configuration.consts.PropertiesKeys.DEFAULT_ENV_KEY;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 
+@Slf4j
 public class EnvironmentProperty {
-
-    private static Logger logger = LoggerFactory.getLogger(EnvironmentProperty.class);
 
     private final String APP_ENV;
     private final BrowserEnvironment BROWSER_ENV;
 
     private EnvironmentProperty() {
         this.APP_ENV = initAppEnv();
-        this.BROWSER_ENV = new BrowserEnvironment(PropertyStore.getConfiguration().getDefaultBrowser());
         this.initEnv();
+        this.BROWSER_ENV = new BrowserEnvironment();
     }
 
     public static EnvironmentProperty getInstance() {
@@ -28,15 +27,16 @@ public class EnvironmentProperty {
     }
 
     private static String initAppEnv() {
-        return PropertyStore.getConfiguration().getDefaultEnvironment();
+        return Optional.ofNullable(PropertyStore.getStringPropertyFromSystem(BROWSER_ENVIRONMENT))
+                .orElse(PropertyStore.getConfiguration().getProperties().get(DEFAULT_ENV_KEY).toString());
     }
 
     private void initEnv() {
         if (!this.APP_ENV.isEmpty()) {
-            logger.debug(" >>>>>>>>>>>>>>>>>>>>>>> Environment name : " + this.APP_ENV);
+            log.info(" >>>>>>>>>>>>>>>>>>>>>>> Environment name : " + this.APP_ENV);
             loadAllEnvPropertiesToSystem();
         } else {
-            logger.error("Please provide env name");
+            log.error("Please provide env name");
             assertThat(true, equalTo(false));
 
         }
@@ -47,21 +47,7 @@ public class EnvironmentProperty {
     }
 
     private void setSystemPropertiesFromConfigClass() {
-        Environment environmentUnderTests = PropertyStore.getEnvironmentUnderTests();
-        Field[] declaredFields = environmentUnderTests.getClass().getDeclaredFields();
-
-        for (Field envConfField : declaredFields) {
-            if (!envConfField.toString().isEmpty()) {
-                try {
-                    System.setProperty(envConfField.getName(), envConfField.get(environmentUnderTests).toString());
-                    logger.debug(String.format("Name %s and value %s",
-                            envConfField.getName(), envConfField.get(environmentUnderTests).toString()));
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-        }
+        PropertyStore.setSystemProperties();
     }
 
     private static class EnvironmentPropertySingleton {

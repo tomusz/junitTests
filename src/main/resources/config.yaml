@@ -11,9 +11,11 @@ browser:
 #  name: firefox
 
 environment:
-    - envName: test
+    test:
+      envName: test
       title: Documentation
       appUrl: https://logback.qos.ch/documentation.html
-    - envName: int
+    int:
+      envName: int
       title: WebDriver | Selenium
       appUrl: https://www.selenium.dev/documentation/en/webdriver/

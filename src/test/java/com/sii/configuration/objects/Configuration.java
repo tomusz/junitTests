@@ -1,25 +1,38 @@
 package com.sii.configuration.objects;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class Configuration {
 
-   private String defaultBrowser;
+    Map<String, Object> properties = new LinkedHashMap<>();
 
-   private String defaultEnvironment;
-
-   @JsonProperty("browser")
+    @JsonProperty("browser")
    private ConfigBrowser configBrowser;
 
-
     @JsonProperty("environment")
-    private List<Environment> environments;
+    private ConfigEnvironmentList environments;
+
+    @JsonAnySetter
+    void setProperties(String key, Object value) {
+        properties.put(key, value);
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+
+
 }

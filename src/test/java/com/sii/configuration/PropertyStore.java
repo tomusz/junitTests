@@ -2,15 +2,14 @@ package com.sii.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.sii.configuration.enums.EnvironmentNames;
+import com.sii.configuration.consts.ConfigPropertiesKeys;
+import com.sii.configuration.consts.PropertiesKeys;
 import com.sii.configuration.objects.ConfigBrowser;
 import com.sii.configuration.objects.ConfigWebElement;
 import com.sii.configuration.objects.Configuration;
-import com.sii.configuration.objects.Environment;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class PropertyStore {
 
@@ -39,14 +38,6 @@ public class PropertyStore {
         return configuration.getConfigBrowser().getConfigWebElement();
     }
 
-    public static Environment getEnvironmentUnderTests() {
-        initConfiguration();
-        EnvironmentNames chosenEnvironment = Arrays.stream(EnvironmentNames.values())
-                .filter(x -> x.getName().equals(configuration.getConfigBrowser().getEnvironment()))
-                .findFirst().get();
-        return configuration.getEnvironments().get(chosenEnvironment.getId());
-    }
-
     private static Configuration loadConfigFile() {
 
         File configFile;
@@ -62,7 +53,27 @@ public class PropertyStore {
             throw new RuntimeException(e);
         }
         return conf;
-
     }
 
+    public static String getChosenEnvironmentName() {
+        return configuration.getConfigBrowser().getProperties().get(ConfigPropertiesKeys.BROWSER_ENVIRONMENT) != null ?
+                configuration.getConfigBrowser().getProperties().get(ConfigPropertiesKeys.BROWSER_ENVIRONMENT).toString() :
+                configuration.getProperties().get(PropertiesKeys.DEFAULT_ENV_KEY).toString();
+    }
+
+    public static void setSystemProperties() {
+        PropertiesHandler.addPropertiesToSystem(configuration);
+    }
+
+    public static int getIntPropertyFromSystem(String key) {
+        return Integer.parseInt(System.getProperty(key));
+    }
+
+    public static boolean getBooleanPropertyFromSystem(String key) {
+        return Boolean.parseBoolean(System.getProperty(key));
+    }
+
+    public static String getStringPropertyFromSystem(String key) {
+        return System.getProperty(key);
+    }
 }

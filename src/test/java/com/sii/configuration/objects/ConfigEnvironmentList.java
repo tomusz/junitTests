@@ -7,22 +7,25 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Getter
 @Setter
 @NoArgsConstructor
-public class Environment {
+public class ConfigEnvironmentList {
 
-    Map<String, Object> properties = new LinkedHashMap<>();
+
+    Map<String, Environment> environments = new LinkedHashMap<>();
 
     @JsonAnySetter
-    void setProperties(String key, Object value) {
-        properties.put(key, value);
+    void setEnvironment(String key, Environment environment) {
+        environments.put(key, environment);
     }
 
     @JsonAnyGetter
-    public Map<String, Object> getProperties() {
-        return properties;
+    public List<Environment> getEnvironments() {
+        return environments.values().stream().toList();
     }
+
 }

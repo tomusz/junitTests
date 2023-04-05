@@ -1,5 +1,6 @@
 package com.sii.configuration;
 
+import com.sii.configuration.consts.PropertiesKeys;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -18,36 +19,17 @@ public class BrowserEnvironment {
     private boolean headlessBrowser;
     private int webElementTimeOut;
     private boolean attachScreenshot;
-    private String environmentName;
     private Logger logger;
     private WebDriver driver;
 
 
     public BrowserEnvironment() {
-        this.browserName = Optional.ofNullable(PropertyStore.getBrowserConfiguration().getName())
-                .orElse(PropertyStore.getConfiguration().getDefaultBrowser());
-        this.headlessBrowser = PropertyStore.getBrowserConfiguration().isHeadless();
-        this.webElementTimeOut = PropertyStore.getWebElementConfiguration().getTimeout();
-        this.attachScreenshot = PropertyStore.getBrowserConfiguration().isScreenshots();
-        this.environmentName = PropertyStore.getBrowserConfiguration().getEnvironment();
+        this.browserName = Optional.ofNullable(PropertyStore.getStringPropertyFromSystem(PropertiesKeys.BROWSER_NAME))
+                .orElse(PropertyStore.getStringPropertyFromSystem(PropertiesKeys.DEFAULT_BROWSER_KEY));
+        this.headlessBrowser = PropertyStore.getBooleanPropertyFromSystem(PropertiesKeys.BROWSER_HEADLESS);
+        this.webElementTimeOut = PropertyStore.getIntPropertyFromSystem(PropertiesKeys.BROWSER_WEBELEMENT_TIMEOUT);
+        this.attachScreenshot = PropertyStore.getBooleanPropertyFromSystem(PropertiesKeys.BROWSER_ATTACH_SCREENSHOTS);
         this.logger = LoggerFactory.getLogger(BrowserEnvironment.class);
-    }
-    public BrowserEnvironment(String defaultBrowser) {
-        this.browserName = Optional.ofNullable(PropertyStore.getBrowserConfiguration().getName()).orElse(defaultBrowser);
-        this.headlessBrowser = PropertyStore.getBrowserConfiguration().isHeadless();
-        this.webElementTimeOut = PropertyStore.getWebElementConfiguration().getTimeout();
-        this.attachScreenshot = PropertyStore.getBrowserConfiguration().isScreenshots();
-        this.environmentName = PropertyStore.getBrowserConfiguration().getEnvironment();
-        this.logger = LoggerFactory.getLogger(BrowserEnvironment.class);
-    }
-
-    public BrowserEnvironment(String browserName, boolean headlessBrowser, int webElementTimeOut,
-                              boolean attachScreenshot, String environmentName) {
-        this.browserName = browserName;
-        this.headlessBrowser = headlessBrowser;
-        this.webElementTimeOut = webElementTimeOut;
-        this.attachScreenshot = attachScreenshot;
-        this.environmentName = environmentName;
     }
 
     public WebDriver getDriver() {
@@ -56,21 +38,23 @@ public class BrowserEnvironment {
             case "chrome":
                 ChromeOptions chromeOptions = new ChromeOptions();
                 WebDriverManager.chromedriver().setup();
-                chromeOptions.addArguments("start-maximised");
+                chromeOptions.addArguments("--start-maximised");
                 driver = new ChromeDriver(chromeOptions);
-                driver.get(PropertyStore.getEnvironmentUnderTests().getApplicationUrl());
+                driver.get(System.getProperty(PropertiesKeys.ENVIRONMENT_URL));
                 break;
             case "firefox" :
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
                 WebDriverManager.firefoxdriver().setup();
-                firefoxOptions.addArguments("start-maximised");
+                firefoxOptions.addArguments("--start-maximised");
                 driver = new FirefoxDriver(firefoxOptions);
-                driver.get(PropertyStore.getEnvironmentUnderTests().getApplicationUrl());
+                driver.manage().window().maximize();
+                driver.get(System.getProperty(PropertiesKeys.ENVIRONMENT_URL));
             default :
                 InternetExplorerOptions internetExplorerOptions = new InternetExplorerOptions();
                 WebDriverManager.iedriver().setup();
                 driver = new InternetExplorerDriver(internetExplorerOptions);
-                driver.get(PropertyStore.getEnvironmentUnderTests().getApplicationUrl());
+                driver.manage().window().maximize();
+                driver.get((System.getProperty(PropertiesKeys.ENVIRONMENT_URL)));
         }
         this.driver = driver;
         return this.driver;
